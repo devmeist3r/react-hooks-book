@@ -1,23 +1,25 @@
-import React, { Fragment, useReducer } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React, { useReducer } from 'react';
+import ToDoList from './ToDoList';
 
-import TodoList from './ToDoList';
-
-const todosInitialState = {
-  todos: [
-    { id: 1, text: 'finishing writing hooks chapter' },
-    { id: 2, text: 'play with kids' },
-    { id: 3, text: 'read bible' },
-  ],
-};
+const todosInitialState = { todos: [] };
 
 export const TodosContext = React.createContext();
 
+function App() {
+  const [state, dispatch] = useReducer(todosReducer, todosInitialState);
+  return (
+    <TodosContext.Provider value={{ state, dispatch }}>
+      <ToDoList />{' '}
+    </TodosContext.Provider>
+  );
+}
+
 function todosReducer(state, action) {
   switch (action.type) {
+    case 'get':
+      return { ...state, todos: action.payload };
     case 'add':
-      const newToDo = { id: uuidv4(), text: action.payload };
-      const addedToDos = [...state.todos, newToDo];
+      const addedToDos = [...state.todos, action.payload];
       return { ...state, todos: addedToDos };
     case 'delete':
       const filteredTodoState = state.todos.filter(
@@ -40,12 +42,4 @@ function todosReducer(state, action) {
   }
 }
 
-function App() {
-  const [state, dispatch] = useReducer(todosReducer, todosInitialState);
-  return (
-    <TodosContext.Provider value={{ state, dispatch }}>
-      <TodoList />
-    </TodosContext.Provider>
-  );
-}
 export default App;

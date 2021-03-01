@@ -1,6 +1,9 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Table, Form, Button } from 'react-bootstrap';
+import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 import { TodosContext } from './App';
+import useApi from './useAPI';
 
 function ToDoList() {
   const { state, dispatch } = useContext(TodosContext);
@@ -8,17 +11,28 @@ function ToDoList() {
   const [editMode, setEditMode] = useState(false);
   const [editTodo, setEditTodo] = useState(null);
   const buttonTitle = editMode ? 'Edit' : 'Add';
-  const handleSubmit = event => {
+
+  const endpoint = 'http://localhost:3000/todos/';
+  const savedTodos = useApi(endpoint);
+
+  useEffect(() => {
+    dispatch({ type: 'get', payload: savedTodos });
+  }, [dispatch, savedTodos]);
+
+  const handleSubmit = async event => {
     event.preventDefault();
     if (editMode) {
       dispatch({ type: 'edit', payload: { ...editTodo, text: todoText } });
       setEditMode(false);
       setEditTodo(null);
     } else {
-      dispatch({ type: 'add', payload: todoText });
+      const newToDo = { id: uuidv4(), text: todoText };
+      await axios.post(endpoint, newToDo);
+      dispatch({ type: 'add', payload: newToDo });
     }
     setTodoText('');
   };
+
   return (
     <div>
       <Form onSubmit={handleSubmit}>
@@ -52,7 +66,10 @@ function ToDoList() {
                 }}>
                 Edit
               </td>
-              <td onClick={() => dispatch({ type: 'delete', payload: todo })}>
+              <td
+                onClick={async () => {
+                  await axios.delete(endpoint + todo.id);
+                }}>
                 Delete
               </td>
             </tr>
@@ -62,4 +79,5 @@ function ToDoList() {
     </div>
   );
 }
+
 export default ToDoList;
