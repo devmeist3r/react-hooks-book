@@ -9,7 +9,7 @@ function App() {
   const [state, dispatch] = useReducer(todosReducer, todosInitialState);
   return (
     <TodosContext.Provider value={{ state, dispatch }}>
-      <ToDoList />{' '}
+      <ToDoList />
     </TodosContext.Provider>
   );
 }
